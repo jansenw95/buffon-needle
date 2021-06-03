@@ -1,0 +1,3 @@
+background of calculating pi
+example of dropping many needles
+explain how it works with single and graph and angles
