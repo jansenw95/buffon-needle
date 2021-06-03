@@ -1,42 +1,67 @@
 from manim import *
 import math
 import random
-
+import numpy as np
 
 class BuffonTest(Scene):
     def construct(self):
-        paper_left = -4
-        paper_right = 4
+        paper_left = -1.5
+        paper_right = 6.5
+        paper_bottom = -3
+        paper_top = 3
+        num_paper_lines = 5 # >1
+
+        # formula for calculating pi underneath only works if needle_len <= paper_spacing
+        needle_len = (paper_top - paper_bottom)/(num_paper_lines - 1)
+        paper_spacing = (paper_top - paper_bottom)/(num_paper_lines - 1)
 
         intersect = 0
         total = 0
         pi_estimate = 0
-        
-        rep = 10
 
-        paper = Group()
-        self.add(paper)
+        pi_counter = MathTex(r"\pi \approx")
+        estimate_text = DecimalNumber(0,
+                                    num_decimal_places=5,
+                                    include_sign=False,
+                                    unit=None,
+                                    show_ellipsis=True
+                                    )
+        estimate_text.add_updater(lambda d: d.set_value(pi_estimate))
+        estimate_text.next_to(pi_counter, RIGHT)
+        estimate_text.shift(0.03*UP)
+        all_text = Group(pi_counter,estimate_text)
+        all_text.to_corner(UL)
 
-        text = Tex(r"$\pi \approx {a}$".format(a = pi_estimate))
-        self.add(text)
-        text.add_updater(lambda obj: obj.become(Tex(r"$\pi \approx {a}$".format(a = pi_estimate))))
-        self.add(text)
+        self.add(all_text)
 
-        for x in range(7):
-            line = Line([paper_left,-3+x,0],[paper_right,-3+x,0]).set_color(WHITE)
-            paper.add(line)
-        for x in range(rep):
-            point_x = random.uniform(paper_left+1, paper_right-1)
-            point_y = random.random()*5-2.5
-            angle = random.random()*math.pi
-            line = Line([point_x-math.cos(angle)*0.5, point_y-math.sin(angle)*0.5, 0], [point_x+math.cos(angle)*0.5, point_y+math.sin(angle)*0.5, 0])
+        for x in range(num_paper_lines):
+            line = Line([paper_left, paper_bottom + paper_spacing*x, 0], 
+                        [paper_right, paper_bottom + paper_spacing*x,0]).set_color(WHITE)
+            self.add(line)
+
+        self.wait()
+
+        for x in range(10):
+            # get random point that will be the center of the line, also keep line from sticking outside paper for aesthetics
+            point_x = random.uniform(paper_left + needle_len/2, paper_right - needle_len/2)
+            point_y = random.uniform(paper_bottom + needle_len/2, paper_top - needle_len/2)
+
+            # calculate the closest distance between the point and a gridline
+            closest_dist = min(point_y - (paper_bottom + paper_spacing*math.floor((point_y - paper_bottom)/paper_spacing)), 
+                               paper_bottom + paper_spacing*math.ceil((point_y - paper_bottom)/paper_spacing) - point_y)
             
-            closest_dist = min(point_y-math.floor(point_y), math.ceil(point_y)-point_y)
-
-            if closest_dist <= math.sin(angle)*0.5:
+            angle = random.random()*math.pi            
+            line = Line([point_x - math.cos(angle)*needle_len/2, point_y - math.sin(angle)*needle_len/2, 0], 
+                        [point_x + math.cos(angle)*needle_len/2, point_y + math.sin(angle)*needle_len/2, 0])
+            
+            # check for intersection
+            if closest_dist <= math.sin(angle)*needle_len/2:
                 line.set_color(RED) 
                 intersect += 1
+
             total += 1
-            paper.add(line)
-            pi_estimate = 2*(x+1)/intersect if intersect else 0
-            self.wait(1)
+            pi_estimate = 2*needle_len*total/intersect/paper_spacing if intersect else 0
+            
+            self.add(line)
+            self.wait(0.1)
+        self.wait(1)
