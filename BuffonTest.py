@@ -19,17 +19,50 @@ class BuffonTest(Scene):
         total = 0
         pi_estimate = 0
 
-        pi_counter = MathTex(r"\pi \approx")
-        estimate_text = DecimalNumber(0,
+        pi_counter = MathTex(r"\pi ")
+        pi_equals = MathTex(r"\approx")
+        total_counter = MathTex(r"n ")
+        total_equals = MathTex(r"=")
+        hit_counter = MathTex(r"k ")
+        hit_equals = MathTex(r"=")
+        estimate_num = DecimalNumber(0,
                                     num_decimal_places=5,
                                     include_sign=False,
                                     unit=None,
                                     show_ellipsis=True
                                     )
-        estimate_text.add_updater(lambda d: d.set_value(pi_estimate))
-        estimate_text.next_to(pi_counter, RIGHT)
-        estimate_text.shift(0.03*UP)
-        all_text = Group(pi_counter,estimate_text)
+        estimate_num.add_updater(lambda d: d.set_value(pi_estimate))
+
+        total_num = Integer(0,
+                            include_sign=False,
+                            unit=None)
+        total_num.add_updater(lambda d: d.set_value(total))
+
+        hit_num = Integer(0,
+                            include_sign=False,
+                            unit=None)
+        hit_num.add_updater(lambda d: d.set_value(intersect))
+
+        # position symbols
+        hit_counter.next_to(total_counter, DOWN)
+        pi_counter.next_to(hit_counter, DOWN*1.15)
+        
+        # position equals
+        total_equals.next_to(total_counter, RIGHT)
+        hit_equals.next_to(total_equals, DOWN*1.75)
+        pi_equals.next_to(pi_counter, RIGHT)
+        
+        # position numbers
+        estimate_num.next_to(pi_equals, RIGHT)
+        estimate_num.shift(0.03*UP)
+
+        total_num.next_to(total_equals, RIGHT)
+        total_num.shift(0.03*UP)
+        
+        hit_num.next_to(hit_equals, RIGHT)
+        hit_num.shift(0.03*UP)
+
+        all_text = Group(pi_counter, estimate_num, total_counter, hit_counter, pi_equals, total_equals, hit_equals, total_num, hit_num)
         all_text.to_corner(UL)
 
         self.add(all_text)
@@ -41,7 +74,7 @@ class BuffonTest(Scene):
 
         self.wait()
 
-        for x in range(10):
+        for x in range(100):
             # get random point that will be the center of the line, also keep line from sticking outside paper for aesthetics
             point_x = random.uniform(paper_left + needle_len/2, paper_right - needle_len/2)
             point_y = random.uniform(paper_bottom + needle_len/2, paper_top - needle_len/2)
