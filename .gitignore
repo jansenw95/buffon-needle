@@ -1,2 +1,6 @@
 __pycache__/
 media/
+
+# vscode + mac
+.vscode/
+.DS_Store
