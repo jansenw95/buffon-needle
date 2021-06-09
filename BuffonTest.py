@@ -3,10 +3,12 @@ import math
 import random
 import numpy as np
 
+# set random seed for consistency 
+random.seed(2)  
+
 intersect = 0
 total = 0
 pi_estimate = 0
-
 
 class BuffonTest(Scene):
     def construct(self):
@@ -53,23 +55,20 @@ class BuffonTest(Scene):
             line_group.add(line)
         self.play(Create(line_group, lag_ratio=0.1))   
 
-        self.wait(1)
+        self.wait(2)
 
         self.play(AnimationGroup(Write(total_var), Write(total_num), lag_ratio=0.4))
         self.play(AnimationGroup(Write(hit_var), Write(hit_num), lag_ratio=0.4))
 
         self.wait(1)
 
-        self.play(Wiggle(total_var.get_part_by_tex("n"), scale_value=1.5, rotation_angle=0.2))
+        self.play(Indicate(total_var.get_part_by_tex("n"), scale_factor=1.5))
 
-        self.wait(1)
+        self.wait(2)
 
-        self.play(Wiggle(hit_var.get_part_by_tex("k"), scale_value=1.5, rotation_angle=0.2))
+        self.play(Indicate(hit_var.get_part_by_tex("k"), scale_factor=1.5))
 
-        # set random seed for consistency 
-        random.seed(0)
-
-        def draw_needles(num_needles, fade, time):
+        def draw_needles(num_needles, fade, time=0):
             global intersect, total, pi_estimate
 
             for _ in range(num_needles):
@@ -90,7 +89,7 @@ class BuffonTest(Scene):
                     needle.set_color(RED) 
             
                 if fade:
-                    self.play(FadeIn(needle, scale=0.66).set_run_time(time))
+                    self.play(FadeIn(needle, scale=0.66))
                 else:
                     self.add(needle)
                     self.wait(time)
@@ -99,14 +98,35 @@ class BuffonTest(Scene):
                     intersect += 1
                 total += 1
                 pi_estimate = 2*needle_len*total/intersect/paper_spacing if intersect else 0
+
+                if num_needles == 1:
+                    return ([point_x - math.cos(angle)*needle_len/2, point_y - math.sin(angle)*needle_len/2, 0], 
+                            [point_x + math.cos(angle)*needle_len/2, point_y + math.sin(angle)*needle_len/2, 0])
        
-        draw_needles(1, True, 0.5)
+        needle_ends = draw_needles(1, True)
         
-        self.wait(2)
+        self.wait(1)
+
+        needle_brace = BraceBetweenPoints(needle_ends[0], needle_ends[1])
+        needle_brace_text = needle_brace.get_tex("1")
         
-        draw_needles(19, True, 0.2)
+        self.play(Write(needle_brace))
+        self.play(Write(needle_brace_text))
+
+        self.wait(1)
+
+        self.play(AnimationGroup(Transform(needle_brace, BraceBetweenPoints([-1.5, 1.5, 0], [-1.5, 0, 0])), 
+                                Transform(needle_brace_text, BraceBetweenPoints([-1.5, 1.5, 0], [-1.5, 0, 0]).get_tex("1")), lag_ratio=0))
+
+        self.wait(1)
+
+        self.play(AnimationGroup(Unwrite(needle_brace), Unwrite(needle_brace_text), lag_ratio=0))
         
-        self.wait(2)
+        self.wait(1)
+
+        draw_needles(49, False, 0.1)
+
+        self.wait(1)
         
         pi_formula = MathTex("\\pi", "\\approx", "{2n", "\\over", "k}")
         pi_formula.move_to(5.6*LEFT + 1.25*UP)
@@ -116,8 +136,15 @@ class BuffonTest(Scene):
         
         # draw pi approximation formula
         self.play(Transform(target_n, pi_formula.get_part_by_tex("{2n")))
+        
+        self.wait(1)
+
         self.play(Write(pi_formula.get_part_by_tex("\\over")))
+        
         self.play(Transform(target_k, pi_formula.get_part_by_tex("k}")))
+        
+        self.wait(1)
+
         self.play(AnimationGroup(Write(pi_formula.get_part_by_tex("\\pi")), Write(pi_formula.get_part_by_tex("\\approx")), lag_ratio=0.5))
         
         self.wait(2)
@@ -131,8 +158,8 @@ class BuffonTest(Scene):
 
         self.wait(2)
 
-        draw_needles(180, False, 0.05)
-
+        draw_needles(450, False, 0.02)
+        
         self.wait(1)
 
 
