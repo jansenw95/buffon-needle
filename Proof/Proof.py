@@ -40,7 +40,7 @@ class Proof(Scene):
         needle_len_brace = BraceBetweenPoints(needle_left, needle_right, direction=needle.copy().rotate(PI/2).get_unit_vector())
         needle_len_text = needle_len_brace.get_tex("1")
         self.play(Write(needle_len_brace), Write(needle_len_text))
-        self.remove(needle_len_brace, needle_len_text)
+        self.play(FadeOut(needle_len_brace), FadeOut(needle_len_text))
         self.wait()
 
         # distance from center to line
