@@ -4,3 +4,5 @@ media/
 # vscode + mac
 .vscode/
 .DS_Store
+
+Test.py

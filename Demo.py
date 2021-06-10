@@ -8,7 +8,7 @@ total = 0
 pi_estimate = 0
 
 
-class BuffonTest(Scene):
+class Demo(Scene):
     def construct(self):
         global intersect, total, pi_estimate
         paper_left = -1.5
