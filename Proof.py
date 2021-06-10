@@ -42,7 +42,7 @@ class Proof(Scene):
 
         # line dist
         line_dist_brace = BraceBetweenPoints(
-            [-4, paper_bottom, 0], [-4, paper_top, 0], direction=[-1, 0, 0])
+            [-5, paper_bottom, 0], [-5, paper_top, 0], direction=[-1, 0, 0])
         line_dist_brace_text = line_dist_brace.get_tex("k")
         line_group = VGroup(line_dist_brace, line_dist_brace_text)
         self.play(Write(line_group))
@@ -92,7 +92,7 @@ class Proof(Scene):
         group.add(angle_label)
 
         # shift left brace right
-        diagram_shift = 3
+        diagram_shift = 4
         new_line_bottom = Line([paper_left+diagram_shift, paper_bottom, 0], [
             paper_right, paper_bottom, 0])
         new_line_top = Line([paper_left+diagram_shift, paper_top, 0], [
@@ -174,7 +174,7 @@ class Proof(Scene):
                        "\\over", "\\text{Total area}}").scale(0.8).move_to(left_origin + UP*1.5)
         integral = MathTex("\\text{Area under curve} =", " \\int", "_{0}^{\\pi}",
                            "{l\\over 2}", "\\sin \\theta", " =", "l").scale(0.8).move_to(left_origin)
-        area = MathTex("\\text{Total area} =", " (\\frac{k}{2})", "(\\pi)", " = ", "\\frac{k\\pi}{2}").scale(
+        area = MathTex("\\text{Total area} =", " (\\frac{k}{2})(\\pi)", " = ", "{k", "\\pi", "\\over 2}}").scale(
             0.8).move_to(left_origin+DOWN*1.5)
         group.add(prob, integral, area)
         self.play(AnimationGroup(
@@ -186,44 +186,93 @@ class Proof(Scene):
         self.play(TransformFromCopy(prob, simple_prob))
         
         # filling in desired
-        uneval_ex = MathTex("=", "{l", "\\over", "\\frac{k \\pi}{2}}").next_to(simple_prob, RIGHT)
+        uneval_ex = MathTex("=", "{l", "\\over", "{k", "\\pi", "\\over 2}}").next_to(simple_prob, RIGHT)
         self.play(Write(uneval_ex.get_part_by_tex("=")))
         self.play(Indicate(integral), Indicate(simple_prob.get_part_by_tex("{\\text{Desired}")))
         self.play(TransformFromCopy(integral[-1], uneval_ex.get_part_by_tex("l")))
         self.play(Write(uneval_ex.get_part_by_tex("\\over")))
 
         self.play(Indicate(area), Indicate(simple_prob.get_part_by_tex("\\text{Total}}")))
-        self.play(TransformFromCopy(area.get_part_by_tex("\\frac{k\\pi}{2}"), uneval_ex.get_part_by_tex("\\frac{k \\pi}{2}}")))
-
+        self.play(AnimationGroup(TransformFromCopy(area.get_parts_by_tex("{k")[1], uneval_ex.get_part_by_tex("{k")), 
+                                TransformFromCopy(area.get_parts_by_tex("\\pi")[1], uneval_ex.get_part_by_tex("\\pi")), 
+                                TransformFromCopy(area.get_part_by_tex("\\over 2"), uneval_ex.get_part_by_tex("\\over 2}}")), lag_ratio=0))
+        self.wait(0.5)
         # simplification
-        eval_ex = MathTex("=", "\\frac{2l}{k\\pi}").next_to(simple_prob, RIGHT)
-        self.play(Transform(uneval_ex[1:], eval_ex[1]))
+        eval_ex = MathTex("=", "{2", "l", "\\over", "k", "\\pi}").next_to(simple_prob, RIGHT)
+        self.play(AnimationGroup(Transform(uneval_ex.get_part_by_tex("="), eval_ex.get_part_by_tex("=")),
+                                Transform(uneval_ex.get_part_by_tex("{l"), eval_ex.get_part_by_tex("l")),
+                                Transform(uneval_ex.get_part_by_tex("{k"), eval_ex.get_part_by_tex("k")),
+                                Transform(uneval_ex.get_part_by_tex("\\pi"), eval_ex.get_part_by_tex("\\pi")),
+                                Transform(uneval_ex.get_part_by_tex("\\over 2"), eval_ex.get_part_by_tex("{2")),
+                                Transform(uneval_ex.get_part_by_tex("\\over"), eval_ex.get_part_by_tex("\\over"))), lag_ratio=0.5)
         
         # replacing a few objects with one object
-        pre_ex = MathTex("p", "=", "{\\text{Desired}", "\\over", "\\text{Total}}", "= \\frac{2l}{k\\pi}").align_to(simple_prob, LEFT).align_to(simple_prob, UP)
+        pre_ex = MathTex("p", "=", "{\\text{Desired}", "\\over", "\\text{Total}}", "=", "{2", "l", "\\over", "k", "\\pi}").align_to(simple_prob, LEFT).align_to(simple_prob, UP)
+
+        final_ex = MathTex("p", "=", "{2", "l", "\\over", "k", "\\pi}").move_to(ORIGIN)
+
+        # make sure everything is aligned before resetting
+        for x in range(0, 6):
+            pre_ex[x+5].move_to(eval_ex[x].get_center())
+
+        # remove everything
+        animations = []
+        n_objs = 0
+        for mobj in self.get_top_level_mobjects():
+            # horrible hard coding, couldnt figure out how else to keep pre_ex
+            if len(mobj) < 5 or len(mobj) > 6:
+                animations.append(FadeOut(mobj))
+            n_objs += 1
+        self.play(AnimationGroup(*animations, lag_ratio=0))
         self.clear()
         self.add(pre_ex)
         self.wait()
-
-        # 
-        final_ex = MathTex("p", " = \\frac{2l}{k", "\\pi}").move_to(ORIGIN)
-        self.play(Transform(pre_ex, final_ex))
+        
+        # create transforms for every component, also unwrite desired/total
+        animations = []
+        for x in range(0, 7):
+            if x == 0:
+                animations.append(Transform(pre_ex.get_part_by_tex("p"), final_ex[0]))
+            if 1 <= x <= 4:
+                animations.append(Unwrite(pre_ex[x]).set_run_time(0.4))
+            if x >= 1:
+                animations.append(Transform(pre_ex[x+4], final_ex[x]))
+        self.play(AnimationGroup(*animations, lag_ratio=0))
+        self.add(final_ex)
+        self.wait(1)
         return final_ex
 
     def draw_conclusion(self, final_ex):
         # solve for pi
         self.play(Swap(final_ex.get_part_by_tex("p"), final_ex.get_part_by_tex("pi}")))
+        self.wait(1)
 
         # shift up
         self.play(final_ex.animate.shift(UP))
-        knl = MathTex("k, l = 1").next_to(final_ex, DOWN)
+        knl = Tex("Set $k$ equal to $l$").next_to(final_ex, DOWN)
         self.play(Write(knl))
-        
+        self.wait(1)
+
         # plug in
-        rewritten_eq = MathTex("\\pi = \\frac{2}{p}").shift(UP)
-        self.play(FadeOut(knl), Transform(final_ex, rewritten_eq))
+        rewritten_eq = MathTex("\\pi", "=", "{2", "\\over", "p}").shift(UP)
+
+        # rearrange        
+        self.play(AnimationGroup(FadeOut(knl), 
+                                Transform(final_ex.get_part_by_tex("\\pi"), rewritten_eq.get_part_by_tex("\\pi")),
+                                Transform(final_ex.get_part_by_tex("="), rewritten_eq.get_part_by_tex("=")),
+                                Transform(final_ex.get_part_by_tex("{2"), rewritten_eq.get_part_by_tex("2")),
+                                Transform(final_ex.get_part_by_tex("p"), rewritten_eq.get_part_by_tex("p}")),
+                                Transform(final_ex.get_part_by_tex("\\over"), rewritten_eq.get_part_by_tex("\\over")),
+                                FadeOut(final_ex.get_part_by_tex("l")),
+                                FadeOut(final_ex.get_part_by_tex("k"))), lag_ratio=0)
         
         # definition of p
         p_words = MathTex("p = {\\text{\\# of intersections} \\over \\text{\\# of drops}}").shift(DOWN*.5)
         self.play(Write(p_words))
-        return Group(rewritten_eq, p_words)
+        self.wait(1)
+
+        # fade out everything
+        animations = []
+        for mobj in self.get_top_level_mobjects():
+            animations.append(FadeOut(mobj))
+        self.play(AnimationGroup(*animations, lag_ratio=0))

@@ -10,7 +10,7 @@ intersect = 0
 total = 0
 pi_estimate = 0
 
-class Demo(Scene):
+class BuffonTest(Scene):
     def construct(self):
         global intersect, total, pi_estimate
         paper_left = -1.5
@@ -25,7 +25,7 @@ class Demo(Scene):
 
         # initialize text
         total_var = MathTex("n", "=")
-        hit_var = MathTex("k", "=")
+        hit_var = MathTex("m", "=")
 
         pi_num = DecimalNumber(0,
                                 num_decimal_places=5,
@@ -66,7 +66,7 @@ class Demo(Scene):
 
         self.wait(2)
 
-        self.play(Indicate(hit_var.get_part_by_tex("k"), scale_factor=1.5))
+        self.play(Indicate(hit_var.get_part_by_tex("m"), scale_factor=1.5))
 
         def draw_needles(num_needles, fade, time=0):
             global intersect, total, pi_estimate
@@ -128,11 +128,11 @@ class Demo(Scene):
 
         self.wait(1)
         
-        pi_formula = MathTex("\\pi", "\\approx", "{2n", "\\over", "k}")
+        pi_formula = MathTex("\\pi", "\\approx", "{2n", "\\over", "m}")
         pi_formula.move_to(5.6*LEFT + 1.25*UP)
        
         target_n = total_var.get_part_by_tex("n").copy()
-        target_k = hit_var.get_part_by_tex("k").copy()
+        target_m = hit_var.get_part_by_tex("m").copy()
         
         # draw pi approximation formula
         self.play(Transform(target_n, pi_formula.get_part_by_tex("{2n")))
@@ -141,7 +141,7 @@ class Demo(Scene):
 
         self.play(Write(pi_formula.get_part_by_tex("\\over")))
         
-        self.play(Transform(target_k, pi_formula.get_part_by_tex("k}")))
+        self.play(Transform(target_m, pi_formula.get_part_by_tex("m}")))
         
         self.wait(1)
 
@@ -161,5 +161,3 @@ class Demo(Scene):
         draw_needles(450, False, 0.02)
         
         self.wait(1)
-
-
