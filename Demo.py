@@ -46,7 +46,7 @@ class Demo(Scene):
         total_var.move_to(6*LEFT + 3*UP)
         total_num.move_to(5.27*LEFT + 3.02*UP)
         hit_var.move_to(6*LEFT + 2.35*UP)
-        hit_num.move_to(5.27*LEFT + 2.33*UP)
+        hit_num.move_to(5.26*LEFT + 2.36*UP)
 
         line_group = VGroup()
         for x in reversed(range(num_paper_lines)):
