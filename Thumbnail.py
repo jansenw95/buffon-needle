@@ -25,7 +25,7 @@ class Thumbnail(Scene):
 
         for x in reversed(range(num_paper_lines)):
             line = Line([paper_left, paper_bottom + paper_spacing*x, 0], 
-                        [paper_right, paper_bottom + paper_spacing*x,0]).set_color(WHITE)
+                        [paper_right, paper_bottom + paper_spacing*x,0], stroke_width=6).set_color(WHITE)
             self.add(line)
 
         def draw_needles(num_needles, fade, time=0):
@@ -42,7 +42,7 @@ class Thumbnail(Scene):
                 
                 angle = random.random()*math.pi            
                 needle = Line([point_x - math.cos(angle)*needle_len/2, point_y - math.sin(angle)*needle_len/2, 0], 
-                            [point_x + math.cos(angle)*needle_len/2, point_y + math.sin(angle)*needle_len/2, 0])
+                            [point_x + math.cos(angle)*needle_len/2, point_y + math.sin(angle)*needle_len/2, 0], stroke_width=6)
                 
                 # check for intersection
                 if closest_dist <= math.sin(angle)*needle_len/2:
