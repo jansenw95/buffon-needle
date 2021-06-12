@@ -38,7 +38,7 @@ class Proof(Scene):
             paper_right, paper_bottom, 0])
         line_top = Line([paper_left, paper_top, 0], [
             paper_right, paper_top, 0])
-        self.add(line_bottom, line_top)
+        self.play(AnimationGroup(Create(line_bottom), Create(line_top)), lag_ratio=0.5)
 
         # line dist
         line_dist_brace = BraceBetweenPoints(
@@ -86,7 +86,7 @@ class Proof(Scene):
         group.add(base_line, side_line, angle, angle_label)
 
         # right angle side label
-        angle_label = MathTex(r"\frac{l}{2} \sin \theta ").scale(
+        angle_label = MathTex(r"\frac{l\sin \theta}{2}  ").scale(
             0.8).next_to(side_line, RIGHT)
         self.play(Write(angle_label))
         group.add(angle_label)
@@ -142,25 +142,17 @@ class Proof(Scene):
         self.play(AnimationGroup(*[Write(y) for y in y_text], lag_ratio=0))
         group.add(*x_text, *y_text)
 
-        # write equation
-        label = MathTex("d ", "\\leq \\frac{l\\sin\\theta}{2}").shift(origin)
-        self.play(Write(label[0]))
-        self.play(Write(label[1]))
-        self.play(label.animate.scale(0.8).shift(.6*UP+3*RIGHT))
-        group.add(label)
-
         # graph the function
         curve = axes.get_graph(lambda x: np.sin(x)/2, color=BLUE)
         area = axes.get_area(curve, color=BLUE)
         self.play(Create(curve))
 
-        # dashed line
-        dashed_line = DashedLine(
-            origin + LEFT*4 + DOWN*2 + UP*2.9, 
-            origin + DOWN*2 + RIGHT*.05 + UP*2.9, 
-            dash_length=0.3, dash_spacing=0.15, color=YELLOW)
-        self.play(Create(dashed_line, reversed=True))
-        group.add(dashed_line)
+        # write equation
+        label = MathTex("d ", "\\leq \\frac{l\\sin\\theta}{2}").shift(origin).scale(0.8).shift(.6*UP+3*RIGHT)
+        self.play(Write(label[0]))
+        self.play(Write(label[1]))
+        self.add(label)
+        group.add(label)
 
         # adding the area
         self.play(Create(area))
@@ -170,11 +162,11 @@ class Proof(Scene):
         group = Group()
         # constructing full equations
         left_origin = [-3, 0, 0]
-        prob = MathTex("\\text{Probability of intersection}", "\\\=", "{\\text{Desired area}",
+        prob = MathTex("\\text{Probability of intersection}", "\\\p=", "{\\text{Desired area}",
                        "\\over", "\\text{Total area}}").scale(0.8).move_to(left_origin + UP*1.5)
         integral = MathTex("\\text{Area under curve} =", " \\int", "_{0}^{\\pi}",
-                           "{l\\over 2}", "\\sin \\theta", " =", "l").scale(0.8).move_to(left_origin)
-        area = MathTex("\\text{Total area} =", " (\\frac{k}{2})(\\pi)", " = ", "{k", "\\pi", "\\over 2}}").scale(
+                           "{l\\sin \\theta\\over 2}", " =", "l").scale(0.8).move_to(left_origin)
+        area = MathTex("\\text{Total area} =", " (\\frac{k}{2})", "(\\pi)", " = ", "{k\\pi\\over 2}}").scale(
             0.8).move_to(left_origin+DOWN*1.5)
         group.add(prob, integral, area)
         self.play(AnimationGroup(
@@ -188,15 +180,11 @@ class Proof(Scene):
         # filling in desired
         uneval_ex = MathTex("=", "{l", "\\over", "{k", "\\pi", "\\over 2}}").next_to(simple_prob, RIGHT)
         self.play(Write(uneval_ex.get_part_by_tex("=")))
-        self.play(Indicate(integral), Indicate(simple_prob.get_part_by_tex("{\\text{Desired}")))
         self.play(TransformFromCopy(integral[-1], uneval_ex.get_part_by_tex("l")))
         self.play(Write(uneval_ex.get_part_by_tex("\\over")))
-
-        self.play(Indicate(area), Indicate(simple_prob.get_part_by_tex("\\text{Total}}")))
         self.play(AnimationGroup(TransformFromCopy(area.get_parts_by_tex("{k")[1], uneval_ex.get_part_by_tex("{k")), 
                                 TransformFromCopy(area.get_parts_by_tex("\\pi")[1], uneval_ex.get_part_by_tex("\\pi")), 
                                 TransformFromCopy(area.get_part_by_tex("\\over 2"), uneval_ex.get_part_by_tex("\\over 2}}")), lag_ratio=0))
-        self.wait(0.5)
         # simplification
         eval_ex = MathTex("=", "{2", "l", "\\over", "k", "\\pi}").next_to(simple_prob, RIGHT)
         self.play(AnimationGroup(Transform(uneval_ex.get_part_by_tex("="), eval_ex.get_part_by_tex("=")),
@@ -245,13 +233,11 @@ class Proof(Scene):
     def draw_conclusion(self, final_ex):
         # solve for pi
         self.play(Swap(final_ex.get_part_by_tex("p"), final_ex.get_part_by_tex("pi}")))
-        self.wait(1)
 
         # shift up
         self.play(final_ex.animate.shift(UP))
         knl = Tex("Set $k$ equal to $l$").next_to(final_ex, DOWN)
         self.play(Write(knl))
-        self.wait(1)
 
         # plug in
         rewritten_eq = MathTex("\\pi", "=", "{2", "\\over", "p}").shift(UP)
@@ -267,7 +253,7 @@ class Proof(Scene):
                                 FadeOut(final_ex.get_part_by_tex("k"))), lag_ratio=0)
         
         # definition of p
-        p_words = MathTex("p = {\\text{\\# of intersections} \\over \\text{\\# of drops}}").shift(DOWN*.5)
+        p_words = MathTex("p \\approx {\\text{\\# of intersections} \\over \\text{\\# of drops}}").shift(DOWN*.5)
         self.play(Write(p_words))
         self.wait(1)
 

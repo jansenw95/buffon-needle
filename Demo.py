@@ -74,7 +74,7 @@ class Demo(Scene):
             for _ in range(num_needles):
                 # get random point that will be the center of the line, also keep line from sticking outside paper for aesthetics
                 point_x = random.uniform(paper_left + needle_len/2, paper_right - needle_len/2)
-                point_y = random.uniform(paper_bottom + needle_len/2, paper_top - needle_len/2)
+                point_y = random.uniform(paper_bottom + paper_spacing/2, paper_top - paper_spacing/2)
 
                 # calculate the closest distance between the point and a gridline
                 closest_dist = min(point_y - (paper_bottom + paper_spacing*math.floor((point_y - paper_bottom)/paper_spacing)), 
